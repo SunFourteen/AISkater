@@ -1,3 +1,7 @@
 *.txt
 *.pth
+*.log
+**/__pycache__/
+
+notes.md
 gru.py
