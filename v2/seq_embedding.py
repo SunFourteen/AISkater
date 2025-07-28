@@ -2,26 +2,29 @@ import torch
 import torch.nn as nn
 import torch.nn.utils.rnn as rnn_utils
 import torch.nn.functional as F
-import numpy as np
-
-from scipy.spatial.distance import cdist
 from torch.utils.data import Dataset, DataLoader
 
+import numpy as np
+from scipy.spatial.distance import cdist
+
+import time
 from tqdm import tqdm
 from datetime import datetime
-import time
+
 from load_data import Load_Data
 
-class SequentialEmbedder(nn.Module):
+
+
+class SequenceEmbedder(nn.Module):
     
     '''
     Boidirectional GRU
 
-    INPUT
+    INPUT  
     src: (batch_size, max_seq_len, input_dim)  
     src_lens: (batch_size, )
 
-    OUTPUT
+    OUTPUT  
     embedding: (batch_size, embedding_dim)
     '''
     
@@ -51,14 +54,14 @@ class SequentialEmbedder(nn.Module):
     
     def forward(self, src, src_lens):
         
-        # self.rnn:
+        # self.rnn
         # INPUT
         # src: (batch_size, max_seq_len, input_dim)
         # OUTPUT
         # output: (batch_size, max_seq_len, hidden_dim * num_directions)
         # hidden: (num_layers * num_directions, batch_size, hidden_dim)
 
-        # self.projection:
+        # self.projection
         # INPUT   hidden: (batch_size, hidden_dim * num_layers * num_directions, )
         # OUTPUT  embedding:(batch_size, embedding_dim)
 
@@ -69,10 +72,10 @@ class SequentialEmbedder(nn.Module):
             src, src_lens.cpu(), batch_first=True, enforce_sorted=False
             )
         # PackedSequence class
-        packed_outputs, hidden = self.rnn(packed_src)
+        packed_output, hidden = self.rnn(packed_src)
         # PackedSequence class, (nun_layers * num_directions, batch_size, hidden_dim)
         output, _ = nn.utils.rnn.pad_packed_sequence(
-            packed_outputs, batch_first=True
+            packed_output, batch_first=True
         )
         # (batch_size, max_seq_len, hidden_dim * num_directions)
 
@@ -198,10 +201,8 @@ class SequenceDataset(Dataset):
     def __init__(self, file_path):
         
         self.load_data = Load_Data(file_path)
-        self.anchor = self.load_data.anchor
-        self.positive = self.load_data.positive
-        self.negative = self.load_data.negative
-        self.size = self.load_data.anchor_size
+        self.anchor, _, self.positive, _, self.negative, _ = self.load_data.v2()
+        self.size = self.load_data.data_size
     
 
     def __len__(self):
@@ -310,8 +311,8 @@ def train(model, dataloader, optimizer, criterion, device, epochs=20):
             epoch_loss += loss.item()
             print(f'Eopch[{epoch+1}/{epochs}] Batch[{batch_idx+1}/{batch_num}] Loss: {loss}')
         
-        epoch_ave_loss = epoch_loss / batch_num
-        print(f'Eopch[{epoch+1}/{epochs}] Average_Loss: {epoch_ave_loss}')
+        epoch_avg_loss = epoch_loss / batch_num
+        print(f'Eopch[{epoch+1}/{epochs}] Average_Loss: {epoch_avg_loss}')
 
 
 
@@ -321,7 +322,6 @@ def train(model, dataloader, optimizer, criterion, device, epochs=20):
 
 BATCH_SIZE = 256
 EPOCHS = 20
-
 
 INPUT_DIM = 6
 HIDDEN_DIM = 64
@@ -339,7 +339,10 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 FILE_PATH = 'puma.txt'
 file_name = FILE_PATH.split('.')[0]
 current_date = datetime.now().strftime('%Y%m%d')
-SAVE_PATH = f'Seq_Embedder_v19_{file_name}_{current_date}.pth'
+SAVE_PATH = f'Seq_Embedder_v2_{file_name}_{current_date}.pth'
+
+
+
 
 
 if __name__ == '__main__':
@@ -355,7 +358,7 @@ if __name__ == '__main__':
     )
     print(f'Load Data Done! Size: {len(dataset)}')
 
-    model = SequentialEmbedder(
+    model = SequenceEmbedder(
         INPUT_DIM, 
         HIDDEN_DIM, 
         EMBEDDING_DIM, 
