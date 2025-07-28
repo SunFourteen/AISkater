@@ -285,9 +285,9 @@ class SlideDataset(Dataset):
         self.eos_idx = eos_idx
         self.pad_idx = pad_idx
         self.converter = converter
-        self.data = self.load_data.data
+        self.data, _, self.max_src_len = self.load_data.v1()
         self.num_samples = self.load_data.data_size
-        self.max_src_len = self.load_data.max_length + 2
+        self.max_src_len = self.max_src_len + 2
         self.max_trg_len = max_trg_len
 
 

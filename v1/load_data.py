@@ -8,50 +8,38 @@ class Load_Data():
     
     def __init__(self, word_path):
         
-        self.data_size = 0
         self.word_path = word_path
         self.key_seq_fault_rate = 0.1
+
+
+    def v1(self):
+
+        data, data_size, max_length = self.generate_data()
         
+        return data, data_size, max_length
 
-        words = self.load_words()
-        # print(words[0])
 
-        key_seqs = self.load_key_seqs(words)
-        # print(key_seqs[0])
+    def v2(self):
 
-        disturbanced_key_seqs = self.load_disturbanced_key_seqs(key_seqs)
-        # print(disturbanced_key_seqs[0])
+        anchor, anchor_size, anchor_max_length = self.generate_data()
+        print(f'Anchor Generation Done! \nSize: {anchor_size} \nMax Length: {anchor_max_length} ')
+        positive, positive_size, positive_max_length = self.generate_data()
+        print(f'Positve Generation Done! \nSize: {positive_size} \nMax Length: {positive_max_length} ')
+        negative, negative_size, negative_max_length = self.generate_data()
+        random.shuffle(negative)
+        print(f'Negative Generation Done! \nSize: {negative_size} \nMax Length: {negative_max_length} ')
+       
+        assert (anchor_size == self.data_size 
+                and positive_size == self.data_size 
+                and negative_size== self.data_size)
+        
+        return anchor, anchor_size, positive, positive_size, negative, negative_size
 
-        twist_seqs = self.load_twist_seqs(disturbanced_key_seqs)
-        # print(twist_seqs[0])
-
-        spacial_seqs, timely_seqs, masks = self.load_seqs(twist_seqs)
-        # print(spacial_seqs[0])
-        # print(timely_seqs[0])
-
-        # for seq in spacial_seqs:
-        #     self.show_seq(seq)
-        #     print(len(seq))
-        # for seq in timely_seqs:
-        #     self.show_seq(seq)
-        #     print(len(seq))
-
-        self.data = self.load_data(timely_seqs, words)
-        # print(self.data[0])
-        self.data_size = len(self.data)
-        # print('self.data_size')
-        self.max_length = max(len(self.data[i][0]) for i in range(self.data_size))
-        # print(self.max_length)
-        for i in range(self.data_size):
-            for j in range(len(self.data[i][0])):
-                if len(self.data[i][0][j]) != 6:
-                    print('ERROR! position: {i} {j}')  
-        print(f'Data Generation Done! \nData Size: {self.data_size} \nMax Length: {self.max_length} ')
         
         
-    def load_words(self):
+    def load_words(self, word_path):
         
-        with open(self.word_path, "r") as f:
+        with open(word_path, "r") as f:
             words = f.readlines()
         self.data_size = len(words)
 
@@ -218,6 +206,46 @@ class Load_Data():
             
         print('Load Data Done! ')
         return dataset # list[(list(x, y, dx, dy, dtheta, dt), word)]
+    
+
+    def generate_data(self):
+
+        words = self.load_words(self.word_path)
+        # print(words[0])
+
+        key_seqs = self.load_key_seqs(words)
+        # print(key_seqs[0])
+
+        disturbanced_key_seqs = self.load_disturbanced_key_seqs(key_seqs)
+        # print(disturbanced_key_seqs[0])
+
+        twist_seqs = self.load_twist_seqs(disturbanced_key_seqs)
+        # print(twist_seqs[0])
+
+        spacial_seqs, timely_seqs, masks = self.load_seqs(twist_seqs)
+        # print(spacial_seqs[0])
+        # print(timely_seqs[0])
+
+        # for seq in spacial_seqs:
+        #     self.show_seq(seq)
+        #     print(len(seq))
+        # for seq in timely_seqs:
+        #     self.show_seq(seq)
+        #     print(len(seq))
+
+        data = self.load_data(timely_seqs, words)
+        # print(data[0])
+        data_size = len(data)
+        # print(data_size')
+        max_length = max(len(data[i][0]) for i in range(data_size))
+        # print(self.max_length)
+
+        for i in range(data_size):
+            for j in range(len(data[i][0])):
+                if len(data[i][0][j]) != 6:
+                    print('ERROR! position: {i} {j}')
+        
+        return data, data_size, max_length
 
 
     def letter2key(self, letter):
