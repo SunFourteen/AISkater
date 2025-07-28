@@ -15,14 +15,6 @@ sft at 25.7.23
 
 完成这一版模型，实现生成数据下的训练。于cpu上运行成功
 
-dataset: puma.txt  
-data size: 260  
-max length: 167  
-epoch: 20  
-batch size: 16  
-loss: 0.7360  
-run time: 45min
-
 TODO
 1. 实现eval
 2. 修改模型，实现产生真实单词
@@ -32,3 +24,15 @@ sft at 25.7.24
 实现eval
 
 sft at 25.7.25
+
+# v2
+
+这一版模型旨在对序列和单词分别嵌入后对齐
+
+完成两个嵌入模型并运行训练
+
+TODO
+1. 实现对两个嵌入模型的eval
+2. 完成对齐模型
+
+sft at 25.7.28
