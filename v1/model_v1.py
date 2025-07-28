@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.utils.rnn as rnn_utils
 import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset, random_split
-from tqdm import tqdm
 import math
 from datetime import datetime
 from load_data import Load_Data
