@@ -6,7 +6,6 @@ from torch.utils.data import Dataset, DataLoader
 import numpy as np
 
 import time
-from tqdm import tqdm
 from datetime import datetime
 
 from load_data import Load_Data
@@ -94,7 +93,7 @@ class WordEmbedder(nn.Module):
 
 class EditDistanceLoss(nn.Module):
 
-    def __init__(self, similarity_weight, temperature=0.1, margin=1.0):
+    def __init__(self, similarity_weight=0.7, temperature=0.1, margin=3.0):
 
         """
         EditDistanceLoss
@@ -170,7 +169,7 @@ class WordDataset(Dataset):
 
     def __len__(self):
 
-        return len(self.word)
+        return self.load_data.data_size
     
 
     def __getitem__(self, idx):

@@ -195,7 +195,7 @@ class Load_Data():
                 norm_next = max(np.linalg.norm(vec_next), 1e-8)
                 cos_theta = np.dot(vec_prev, vec_next) / (norm_prev * norm_next)
                 cos_theta = np.clip(cos_theta, -1.0, 1.0)
-                dtheta = np.acos(cos_theta) / np.pi
+                dtheta = (np.acos(cos_theta) / np.pi).item()
                 dt = 1
                 data.append((x, y, dx, dy, dtheta, dt)) # normalization
                 

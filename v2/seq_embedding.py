@@ -228,7 +228,7 @@ class SequenceDataset(Dataset):
 
 
 
-def collate_triplet_fn(batch):
+def collate_fn(batch):
 
     anchor_seqs, positive_seqs, negative_seqs = zip(*batch)
     
@@ -280,7 +280,8 @@ def train(model, dataloader, optimizer, criterion, device, epochs=20):
 
             padded_anchors, anchor_lengths, \
             padded_positives, positive_lengths, \
-            padded_negatives, negative_lengths = batch
+            padded_negatives, negative_lengths \
+            = batch
 
             padded_anchors = padded_anchors.to(device)
             anchor_lengths = anchor_lengths.to(device)
@@ -354,7 +355,7 @@ if __name__ == '__main__':
         dataset=dataset,
         batch_size=BATCH_SIZE,
         shuffle=True, 
-        collate_fn=collate_triplet_fn
+        collate_fn=collate_fn
     )
     print(f'Load Data Done! Size: {len(dataset)}')
 
