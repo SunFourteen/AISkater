@@ -20,7 +20,7 @@ class Encoder(nn.Module):
     hidden_layer2: (batch_size, hidden_dim * 2)
     '''
     
-    def __init__(self, input_dim, hidden_dim, num_layers=2, dropout=0.1):
+    def __init__(self, input_dim, hidden_dim, num_layers=2, dropout=0.3):
         
         super().__init__()
         
@@ -136,7 +136,7 @@ class Decoder(nn.Module):
 
     '''
 
-    def __init__(self, alphabet_dim, hidden_dim, num_layers=2, dropout=0.1):
+    def __init__(self, alphabet_dim, hidden_dim, num_layers=2, dropout=0.3):
 
         super().__init__()
         

@@ -93,7 +93,6 @@ class AlignmentDataset(Dataset):
 
         data = self.data[idx]
         seq, word = data
-        seq_tensor = torch.tensor(seq, dtype=torch.float32)
         char_indice = [self.converter[c] for c in word]
 
         return seq, char_indice
@@ -180,7 +179,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 FILE_PATH = 'puma.txt'
 file_name = FILE_PATH.split('.')[0]
 current_date = datetime.now().strftime('%Y%m%d')
-SAVE_PATH = f'Align_2_{file_name}_{current_date}.pth'
+SAVE_PATH = f'Alignment_v2_{file_name}_{current_date}.pth'
 
 SEQ_EMBEDDER_PATH = 'Seq_Embedder_v2_puma_20250728.pth'
 WORD_EMBEDDER_PATH = 'Word_Embedder_v2_puma_20250728.pth'

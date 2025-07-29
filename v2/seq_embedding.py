@@ -29,7 +29,7 @@ class SequenceEmbedder(nn.Module):
     '''
     
     def __init__(self, input_dim, hidden_dim, embedding_dim, 
-                 num_layers=2, num_directions=2, dropout=0.1):
+                 num_layers=2, num_directions=2, dropout=0.3):
         
         super().__init__()
         
