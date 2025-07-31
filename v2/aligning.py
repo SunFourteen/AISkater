@@ -29,15 +29,15 @@ class Alignment(nn.Module):
             param.requires_grad = False
 
         self.seq_projector = nn.Sequential(
-            nn.Linear(embedding_dim, embedding_dim), 
+            nn.Linear(embedding_dim, embedding_dim // 2), 
             nn.ReLU(), 
-            nn.Linear(embedding_dim, embedding_dim)
+            nn.Linear(embedding_dim // 2, embedding_dim)
         )
 
         self.word_projector = nn.Sequential(
-            nn.Linear(embedding_dim, embedding_dim), 
+            nn.Linear(embedding_dim, embedding_dim // 2), 
             nn.ReLU(), 
-            nn.Linear(embedding_dim, embedding_dim)
+            nn.Linear(embedding_dim // 2, embedding_dim)
         )
 
         self.similarity_weight = similarity_weight
@@ -159,7 +159,7 @@ def train(model, dataloader, optimizer, device, epochs=20):
 
 
 BATCH_SIZE = 256
-EPOCHS = 20
+EPOCHS = 50
 
 SEQ_INPUT_DIM = 6
 WORD_INPUT_DIM = 30
@@ -176,13 +176,13 @@ MARGIN = 0.5
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-FILE_PATH = 'puma.txt'
+FILE_PATH = '3500.txt'
 file_name = FILE_PATH.split('.')[0]
 current_date = datetime.now().strftime('%Y%m%d')
 SAVE_PATH = f'Alignment_v2_{file_name}_{current_date}.pth'
 
-SEQ_EMBEDDER_PATH = 'Seq_Embedder_v2_puma_20250728.pth'
-WORD_EMBEDDER_PATH = 'Word_Embedder_v2_puma_20250728.pth'
+SEQ_EMBEDDER_PATH = 'Seq_Embedder_v2_3500_20250730.pth'
+WORD_EMBEDDER_PATH = 'Word_Embedder_v2_3500_20250730.pth'
 
 IDX2CHAR = {
     0: '<PAD>', 1: '<SOS>', 2: '<EOS>', 

@@ -33,11 +33,9 @@ MARGIN = 0.5
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 VOCABULARY_PATH = 'puma.txt'
-TEST_PATH = 'puma.txt'
+TEST_PATH = '3500_test.txt'
 
-SEQ_EMBEDDER_PATH = 'Seq_Embedder_v2_puma_20250728.pth'
-WORD_EMBEDDER_PATH = 'Word_Embedder_v2_puma_20250728.pth'
-ALIGNMENT_PATH = 'Alignment_v2_puma_20250729.pth'
+ALIGNMENT_PATH = 'Alignment_v2_3500_20250731.pth'
 
 IDX2CHAR = {
     0: '<PAD>', 1: '<SOS>', 2: '<EOS>', 

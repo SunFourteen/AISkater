@@ -275,7 +275,7 @@ MARGIN = 3.0
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-FILE_PATH = 'puma.txt'
+FILE_PATH = '3500.txt'
 file_name = FILE_PATH.split('.')[0]
 current_date = datetime.now().strftime('%Y%m%d')
 SAVE_PATH = f'Word_Embedder_v2_{file_name}_{current_date}.pth'
