@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 
 import numpy as np
+import time
 
 from load_data import Load_Data
 from seq_embedding import SequenceEmbedder
@@ -32,8 +33,8 @@ MARGIN = 0.5
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-VOCABULARY_PATH = 'puma.txt'
-TEST_PATH = '3500_test.txt'
+VOCABULARY_PATH = '3500.txt'
+TEST_PATH =  '3500_test.txt'
 
 ALIGNMENT_PATH = 'Alignment_v2_3500_20250731.pth'
 
@@ -95,6 +96,15 @@ class Predictor():
             param.requires_grad = False
         
         self.vocabulary_embeddings, self.vocabulary_words = self.precompute_vocabulary()
+        # array = torch.tensor(self.vocabulary_embeddings)
+        # long_word_indices = [idx for idx, word in enumerate(self.vocabulary_words) if len(word) > 7]
+        # array_long = array[long_word_indices] if long_word_indices else torch.tensor([])
+        # sum_long = torch.sum(array_long, dim=0)
+        # short_word_indices = [idx for idx, word in enumerate(self.vocabulary_words) if len(word) < 6]
+        # array_short = array[short_word_indices] if short_word_indices else torch.tensor([])
+        # sum_short = torch.sum(array_short, dim=0)
+        # print(sum_long, sum_short)
+        # print(torch.linalg.norm(sum_long / array_long.size(0)), torch.linalg.norm(sum_short / array_short.size(0)))
 
 
     def precompute_vocabulary(self):
@@ -150,7 +160,7 @@ class Predictor():
         top_candidates = []
         for i in range(min(5, len(sorted_indices))):
             idx = sorted_indices[i]
-            top_candidates.append((self.vocabulary_words[idx], similarities[idx]))
+            top_candidates.append((self.vocabulary_words[idx], similarities[idx], self.vocabulary_embeddings[idx]))
         
         return predicted_word, confidence, top_candidates
 
@@ -220,6 +230,7 @@ if __name__ == '__main__':
     )
 
     correct = 0
+    time_start = time.time()
 
     for idx, (seq, seq_len, word) in enumerate(test_loader):
 
@@ -231,10 +242,13 @@ if __name__ == '__main__':
         print(f"  Sample {idx+1}:")
         print(f"  Actual: {actual_word}")
         print(f"  Predicted: {predicted_word} --Confidence: {confidence}")
-        for i, (candidate, confidence) in enumerate(candidates):
-            print(f"    {i+1}. {candidate} ({confidence:.4f})")
+        for i, (candidate, confidence, embedding) in enumerate(candidates):
+            print(f"    {i+1}. {candidate} (confidence: {confidence:.4f}) (norm: {np.linalg.norm(embedding)})")
 
         print("-" * 50)
     
+    time_end = time.time()
+    time_duration = time_end - time_start
+    print(time_duration)
     accuracy = correct / len(test_loader)
     print(f'Accuracy: {accuracy}')
