@@ -36,7 +36,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 VOCABULARY_PATH = '3500.txt'
 TEST_PATH =  '3500_test.txt'
 
-ALIGNMENT_PATH = 'Alignment_v2_3500_20250731.pth'
+ALIGNMENT_PATH = 'Alignment_v2_3500_20250804.pth'
 
 IDX2CHAR = {
     0: '<PAD>', 1: '<SOS>', 2: '<EOS>', 

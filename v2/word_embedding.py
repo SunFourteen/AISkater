@@ -4,6 +4,8 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 
 import math
+import sys
+import logging
 import time
 from datetime import datetime
 
@@ -98,10 +100,10 @@ class WordEmbedder(nn.Module):
         norm = F.normalize(norm, p=2, dim=1)
         # (batch_size, embedding_dim)
 
-        # vec_mean = norm.mean(dim=0) # TEST
-        # norms = torch.norm(norm, p=2, dim=1) # TEST
-        # norm_mean = norms.mean() # TEST
-        # print(f"vec_mean: {vec_mean}\nnorm_mean: {norm_mean}") # TEST
+        vec_mean = norm.mean(dim=0) # TEST
+        norms = torch.norm(norm, p=2, dim=1) # TEST
+        norm_mean = norms.mean() # TEST
+        logging.info(f"vec_mean: {vec_mean}\nnorm_mean: {norm_mean}") # TEST
 
         return norm # (batch_size, embedding_dim)
 
@@ -156,13 +158,13 @@ class Loss(nn.Module):
         
         threshold = int(batch_size * batch_size * self.margin)
         positive_mask, negative_mask = self.create_mask(word_similarity, threshold * 2, exclude_diagonal=True)
-        # positive_num = positive_mask.sum().item() # TEST
-        # negative_num = negative_mask.sum().item() # TEST
+        positive_num = positive_mask.sum().item() # TEST
+        negative_num = negative_mask.sum().item() # TEST
 
-        # raw_pos_cos_mean = cos_similarity[positive_mask].mean() if positive_mask.any() else 0  # TEST
-        # raw_neg_cos_mean = cos_similarity[negative_mask].mean() if negative_mask.any() else 0  # TEST
-        # print(f'raw_pos_cos_mean: {raw_pos_cos_mean:.4f}')  # TEST
-        # print(f'raw_neg_cos_mean: {raw_neg_cos_mean:.4f}')  # TEST
+        raw_pos_cos_mean = cos_similarity[positive_mask].mean() if positive_mask.any() else 0  # TEST
+        raw_neg_cos_mean = cos_similarity[negative_mask].mean() if negative_mask.any() else 0  # TEST
+        logging.info(f'raw_pos_cos_mean: {raw_pos_cos_mean:.4f}')  # TEST
+        logging.info(f'raw_neg_cos_mean: {raw_neg_cos_mean:.4f}')  # TEST
 
         logits = cos_similarity / self.temperature
         positive_loss = 0.0
@@ -171,21 +173,21 @@ class Loss(nn.Module):
         if negative_mask.any():
             negative_loss = -torch.log(1 - torch.sigmoid(logits[negative_mask]) + 1e-8).mean()
         contrastive_loss = positive_loss + negative_loss
-        # positive_logit_mean = logits[positive_mask].mean() # TEST
-        # negative_logit_mean = logits[negative_mask].mean() # TEST
-        # positive_logit_std = logits[positive_mask].std() # TEST
-        # negative_logit_std = logits[negative_mask].std() # TEST
-        # print(f'positive_logit: {positive_logit_mean:.4f} ± {positive_logit_std:.4f}') # TEST 
-        # print(f'negative_logit: {negative_logit_mean:.4f} ± {negative_logit_std:.4f}') # TEST
-        # similarity_difference = (cos_similarity - word_similarity).abs().mean() # TEST
-        # print(f"similarity_difference: {similarity_difference:.4f}") # TEST
+        positive_logit_mean = logits[positive_mask].mean() # TEST
+        negative_logit_mean = logits[negative_mask].mean() # TEST
+        positive_logit_std = logits[positive_mask].std() # TEST
+        negative_logit_std = logits[negative_mask].std() # TEST
+        logging.info(f'positive_logit: {positive_logit_mean:.4f} ± {positive_logit_std:.4f}') # TEST 
+        logging.info(f'negative_logit: {negative_logit_mean:.4f} ± {negative_logit_std:.4f}') # TEST
+        similarity_difference = (cos_similarity - word_similarity).abs().mean() # TEST
+        logging.info(f"similarity_difference: {similarity_difference:.4f}") # TEST
 
         total_loss =  self.contrast_weight * contrastive_loss + self.similarity_weight * similarity_loss
-        # print(f'positive_num: {positive_num}') # TEST
-        # print(f'negative_num: {negative_num}') # TEST
-        # print(f'positive_loss: {positive_loss}') # TEST
-        # print(f'negative_loss: {negative_loss}') # TEST
-        # print(f'similarity_loss: {similarity_loss}') # TEST
+        logging.info(f'positive_num: {positive_num}') # TEST
+        logging.info(f'negative_num: {negative_num}') # TEST
+        logging.info(f'positive_loss: {positive_loss}') # TEST
+        logging.info(f'negative_loss: {negative_loss}') # TEST
+        logging.info(f'similarity_loss: {similarity_loss}') # TEST
 
         return total_loss
     
@@ -250,13 +252,13 @@ class SimCalculator():
         pre_jaccard = self.pre_jaccard(word1, word2)
         # pre_dice = self.pre_dice(word1, word2)
         jaro_winkler = self.jaro_winkler(word1, word2)
-        # print(f'jaccard: {jaccard}') # TEST
-        # # print(f'dice: {dice}') # TEST
-        # print(f'lc_subseq: {subseq}') # TEST
-        # print(f'substr: {substr}') # TEST
-        # print(f'pre_jaccard: {pre_jaccard}') # TEST
-        # # print(f'pre_dice: {pre_dice}') # TEST
-        # print(f'jaro_winkler: {jaro_winkler}') # TEST
+        # logging.info(f'jaccard: {jaccard}') # TEST
+        # # logging.info(f'dice: {dice}') # TEST
+        # logging.info(f'lc_subseq: {subseq}') # TEST
+        # logging.info(f'substr: {substr}') # TEST
+        # logging.info(f'pre_jaccard: {pre_jaccard}') # TEST
+        # # logging.info(f'pre_dice: {pre_dice}') # TEST
+        # logging.info(f'jaro_winkler: {jaro_winkler}') # TEST
 
         similarity = (
               jaccard * 0.1 
@@ -515,8 +517,8 @@ def train(model, dataloader, optimizer, criterion, calculator, device, epochs=20
             for i in range(batch_size):
                 for j in range(batch_size):
                     distance_matrix[i, j] = calculator.calculate(words[i], words[j])
-            # print(words) # TEST
-            # print(distance_matrix) # TEST
+            logging.info(words) # TEST
+            logging.info(distance_matrix) # TEST
 
             optimizer.zero_grad()
             embeddings = model(padded, lengths)
@@ -527,10 +529,10 @@ def train(model, dataloader, optimizer, criterion, calculator, device, epochs=20
             optimizer.step()
             
             epoch_loss += loss.item()
-            print(f'Eopch[{epoch+1}/{epochs}] Batch[{batch_idx+1}/{batch_num}] Loss: {loss}')
+            logging.info(f'Eopch[{epoch+1}/{epochs}] Batch[{batch_idx+1}/{batch_num}] Loss: {loss}')
         
         epoch_avg_loss = epoch_loss / batch_num
-        print(f'Eopch[{epoch+1}/{epochs}] Average_Loss: {epoch_avg_loss}')
+        logging.info(f'Eopch[{epoch+1}/{epochs}] Average_Loss: {epoch_avg_loss}')
     
     return model
 
@@ -538,7 +540,7 @@ def train(model, dataloader, optimizer, criterion, calculator, device, epochs=20
 
 
 
-BATCH_SIZE = 256
+BATCH_SIZE = 16
 EPOCHS = 20
 
 INPUT_DIM = 30
@@ -561,10 +563,11 @@ MIN_DIFF = 2
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-FILE_PATH = '3500.txt'
-file_name = FILE_PATH.split('.')[0]
+DATA_PATH = '3500.txt'
+file_name = DATA_PATH.split('.')[0]
 current_date = datetime.now().strftime('%Y%m%d')
-SAVE_PATH = f'Word_Embedder_v2_{file_name}_{current_date}.pth'
+PTH_PATH = f'Word_Embedder_v2_{file_name}_{current_date}.pth'
+LOG_PATH = f'Word_Embedder_v2_{file_name}_{current_date}.log'
 
 IDX2CHAR = {
     0: '<PAD>', 1: '<SOS>', 2: '<EOS>', 
@@ -576,15 +579,30 @@ IDX2CHAR = {
 CHAR2IDX = {v: k for k, v in IDX2CHAR.items()}
 
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+file_handler = logging.FileHandler(
+    filename=LOG_PATH,
+    mode='a', 
+    encoding='utf-8'
+)
+file_handler.setLevel(logging.INFO)
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+console_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
 
 
 
 if __name__ == "__main__":
 
-    print(f'device: {device}')
+    logging.info(f'device: {device}')
 
     dataset = WordDataset(
-        file_path=FILE_PATH, 
+        file_path=DATA_PATH, 
         converter=CHAR2IDX
     )
     dataloader = DataLoader(
@@ -593,7 +611,7 @@ if __name__ == "__main__":
         shuffle=True, 
         collate_fn=collate_fn
     )
-    print(f'Load Data Done! Size: {len(dataset)}')
+    logging.info(f'Load Data Done! Size: {len(dataset)}')
 
     model = WordEmbedder(
         input_dim=INPUT_DIM, 
@@ -603,7 +621,7 @@ if __name__ == "__main__":
         num_directions=NUM_DIRECTIONS, 
         dropout=DROPOUT
     ).to(device)
-    print('Model Initialized! ')
+    logging.info('Model Initialized! ')
     
     optimizer = torch.optim.Adam(
         params=model.parameters(), 
@@ -621,9 +639,9 @@ if __name__ == "__main__":
         max_diff=MAX_DIFF, 
         min_diff=MIN_DIFF
     )
-    print('Optimizer and Criterion Initialized! ')
+    logging.info('Optimizer and Criterion Initialized! ')
 
-    print('Starting Training... ')
+    logging.info('Starting Training... ')
     start_time = time.time()
     train(
         model=model, 
@@ -635,6 +653,6 @@ if __name__ == "__main__":
         epochs=EPOCHS)
     end_time = time.time()
     training_time = end_time - start_time
-    torch.save(model.state_dict(), SAVE_PATH)
-    print(f"Training completed in {training_time//60:.0f}m {training_time%60:.0f}s")
-    print(f"model saved to: {SAVE_PATH}")
+    torch.save(model.state_dict(), PTH_PATH)
+    logging.info(f"Training completed in {training_time//60:.0f}m {training_time%60:.0f}s")
+    logging.info(f"model saved to: {PTH_PATH}")

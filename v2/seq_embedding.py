@@ -219,11 +219,21 @@ class SequenceDataset(Dataset):
         anchor_seq = anchor_data[0]
         positive_seq = positive_data[0]
         negative_seq = negative_data[0]
+
+        anchor_tensor = torch.tensor(anchor_seq, dtype=torch.float32)
+        positive_tensor = torch.tensor(positive_seq, dtype=torch.float32)
+        negative_tensor = torch.tensor(negative_seq, dtype=torch.float32)
         
+        weight = torch.tensor([2.0, 2.0, 3.3, 3.3, 7.0, 1.0])
+
+        anchor_tensor_norm = anchor_tensor * weight
+        positive_tensor_norm = positive_tensor * weight
+        negative_tensor_norm = negative_tensor * weight
+
         return (
-            torch.tensor(anchor_seq, dtype=torch.float32),
-            torch.tensor(positive_seq, dtype=torch.float32),
-            torch.tensor(negative_seq, dtype=torch.float32)
+            anchor_tensor_norm, 
+            positive_tensor_norm, 
+            negative_tensor_norm
         )
 
 
@@ -295,6 +305,11 @@ def train(model, dataloader, optimizer, criterion, device, epochs=20):
                 
                 length = anchor_lengths[i]
                 anchors.append(anchor[:length].cpu().numpy())
+
+            mean = torch.tensor(anchors[0]) # TEST
+            mean = torch.abs(mean) # TEST
+            mean = mean.mean(0) # TEST
+            print(mean) # TEST
 
             similarity_matrix = compute_similarity_matrix(anchors, metric='DTW')
             similarity_matrix = similarity_matrix.to(device)

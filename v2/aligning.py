@@ -5,7 +5,6 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 
 import time
-from tqdm import tqdm
 from datetime import datetime
 
 from load_data import Load_Data
@@ -182,7 +181,7 @@ current_date = datetime.now().strftime('%Y%m%d')
 SAVE_PATH = f'Alignment_v2_{file_name}_{current_date}.pth'
 
 SEQ_EMBEDDER_PATH = 'Seq_Embedder_v2_3500_20250730.pth'
-WORD_EMBEDDER_PATH = 'Word_Embedder_v2_3500_20250730.pth'
+WORD_EMBEDDER_PATH = 'Word_Embedder_v2_3500_20250803.pth'
 
 IDX2CHAR = {
     0: '<PAD>', 1: '<SOS>', 2: '<EOS>', 
