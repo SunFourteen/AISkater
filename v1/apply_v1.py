@@ -25,7 +25,7 @@ PAD_IDX = 0
 SOS_IDX = 1
 EOS_IDX = 2
 MODEL_PATH = 'v1_puma_20250725.pth'
-FILE_PATH = 'test_data.txt'
+FILE_PATH = 'puma_test.txt'
 
 
 def load_model():
